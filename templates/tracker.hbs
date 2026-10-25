@@ -1,0 +1,118 @@
+<div class="rotss-heroic-tracker">
+  <header class="rh-status">
+    {{#if combat}}
+      <span class="rh-round">Round {{combat.round}}</span>
+      {{#if combat.current}}<span class="rh-turn">{{combat.current}}'s turn</span>{{/if}}
+    {{else}}
+      <span class="hint">No combat running. Actions can be used once a combat starts.</span>
+    {{/if}}
+    {{#if isGM}}
+    <span class="rh-gm-tools">
+      <button type="button" data-action="longRest" data-tooltip="Long rest: restore per-rest uses"><i class="fa-solid fa-bed"></i></button>
+      <button type="button" data-action="edit" data-tooltip="Edit companions and heroic actions"><i class="fa-solid fa-pen-to-square"></i></button>
+    </span>
+    {{/if}}
+  </header>
+
+  {{#if hint}}<p class="hint rh-hint">{{hint}}</p>{{/if}}
+
+  {{#if empty}}
+    <p class="hint rh-empty">
+      {{#if isGM}}No companions or heroic actions yet. Use <i class="fa-solid fa-pen-to-square"></i> to add them.
+      {{else}}The GM hasn't added any companions or heroic actions yet.{{/if}}
+    </p>
+  {{/if}}
+
+  {{#if companions.length}}
+  <section class="rh-section">
+    <h3>Companion actions</h3>
+    {{#each companions}}
+    <article class="rh-companion {{#unless active}}inactive{{/unless}}">
+      <header>
+        {{#if img}}<img src="{{img}}" alt="">{{/if}}
+        <div class="rh-name">
+          <strong>{{name}}</strong>
+          <span class="hint">{{refreshLabel}}</span>
+        </div>
+        <span class="rh-pips" data-tooltip="{{left}} of {{points}} actions left">
+          {{#each pips}}<span class="rh-pip {{#if on}}on{{/if}}"></span>{{/each}}
+        </span>
+        {{#if @root.isGM}}
+        <button type="button" class="rh-icon" data-action="refresh" data-companion="{{id}}" data-tooltip="Refresh actions"><i class="fa-solid fa-rotate"></i></button>
+        <input type="checkbox" data-action="setActive" data-companion="{{id}}" {{#if active}}checked{{/if}} data-tooltip="With the party">
+        {{/if}}
+      </header>
+      {{#if warning}}<p class="hint rh-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{warning}}</p>{{/if}}
+      {{#if active}}
+      <div class="rh-actions">
+        {{#each actions}}
+        <button type="button" class="rh-action" data-action="spend" data-kind="companion" data-companion="{{../id}}" data-action-id="{{id}}"
+          {{#if disabled}}disabled{{/if}} data-tooltip="{{#if reason}}{{reason}}{{else}}{{description}}{{/if}}">
+          <span class="rh-action-name">{{name}}</span>
+          <span class="rh-cost">{{cost}}</span>
+          {{#if usesLabel}}<span class="rh-uses">{{usesLabel}}</span>{{/if}}
+        </button>
+        {{/each}}
+      </div>
+      {{/if}}
+    </article>
+    {{/each}}
+  </section>
+  {{/if}}
+
+  {{#if heroics.length}}
+  <section class="rh-section">
+    <h3>Heroic actions <span class="hint">once per round each</span></h3>
+    <div class="rh-heroics">
+      {{#each heroics}}
+      <div class="rh-heroic {{#if used}}used{{/if}} {{#unless available}}unavailable{{/unless}}">
+        {{#if @root.isGM}}<input type="checkbox" data-action="setAvailable" data-heroic="{{id}}" {{#if available}}checked{{/if}} data-tooltip="Available">{{/if}}
+        <button type="button" class="rh-action" data-action="spend" data-kind="heroic" data-heroic="{{id}}"
+          {{#if disabled}}disabled{{/if}} data-tooltip="{{#if reason}}{{reason}}{{else}}{{description}}{{/if}}">
+          <span class="rh-action-name">{{name}}</span>
+          {{#if ally}}<span class="rh-ally">{{ally}}</span>{{/if}}
+          {{#if usesLabel}}<span class="rh-uses">{{usesLabel}}</span>{{/if}}
+          {{#if used}}<span class="rh-used"><i class="fa-solid fa-check"></i> this round</span>{{/if}}
+        </button>
+      </div>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if combat}}
+  <section class="rh-section">
+    <h3>Effect markers
+      {{#if canAddMarker}}<button type="button" class="rh-add" data-action="addMarker"><i class="fa-solid fa-plus"></i> Add</button>{{/if}}
+    </h3>
+    {{#if markers.length}}
+    <ul class="rh-markers">
+      {{#each markers}}
+      <li class="{{#if hidden}}hidden-marker{{/if}}">
+        <i class="fa-solid {{#if refresh}}fa-rotate{{else}}fa-hourglass-half{{/if}}"></i>
+        <span class="rh-marker-text"><strong>{{text}}</strong><span class="hint">{{timing}}</span></span>
+        {{#if @root.isGM}}<button type="button" class="rh-icon" data-action="removeMarker" data-marker="{{id}}" data-tooltip="Remove"><i class="fa-solid fa-xmark"></i></button>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+    {{else}}
+    <p class="hint">No markers. Add one to be reminded when an effect ends.</p>
+    {{/if}}
+  </section>
+  {{/if}}
+
+  {{#if log.length}}
+  <section class="rh-section">
+    <h3>Used this combat</h3>
+    <ol class="rh-log">
+      {{#each log}}
+      <li>
+        <span class="rh-log-round">R{{round}}</span>
+        <span class="rh-log-text">{{label}} <span class="hint">· {{by}}</span></span>
+        {{#if @root.isGM}}<button type="button" class="rh-icon" data-action="undo" data-entry="{{id}}" data-tooltip="Undo"><i class="fa-solid fa-rotate-left"></i></button>{{/if}}
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+  {{/if}}
+</div>

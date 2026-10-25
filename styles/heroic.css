@@ -1,0 +1,96 @@
+/* Raiders of the Serpent Sea: Heroic & Companion Actions */
+
+.rotss-heroic .window-content { padding: 0.6rem 0.75rem; }
+.rotss-heroic-tracker { display: flex; flex-direction: column; gap: 0.75rem; }
+.rotss-heroic .hint { font-size: var(--font-size-12, 12px); opacity: 0.8; }
+.rotss-heroic h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.4rem; font-size: 1rem; border: 0; }
+.rotss-heroic h3 .hint { font-weight: normal; }
+.rotss-heroic button.rh-icon { width: 1.8rem; height: 1.8rem; min-height: 0; padding: 0; flex: none; }
+.rotss-heroic button.rh-add { width: auto; flex: none; margin-left: auto; padding: 0 0.6rem; min-height: 1.8rem; font-size: var(--font-size-12, 12px); }
+
+.rh-status { display: flex; align-items: center; gap: 0.6rem; }
+.rh-round { font-weight: bold; }
+.rh-gm-tools { margin-left: auto; display: flex; gap: 0.25rem; }
+.rh-gm-tools button { width: 2rem; height: 2rem; min-height: 0; padding: 0; }
+.rh-hint, .rh-empty { margin: 0; }
+
+.rh-section { display: flex; flex-direction: column; gap: 0.4rem; }
+
+/* Companions */
+.rh-companion { border: 1px solid var(--color-border, #7a7971); border-radius: 8px; padding: 0.5rem 0.6rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.rh-companion.inactive { opacity: 0.55; border-style: dashed; }
+.rh-companion header { display: flex; align-items: center; gap: 0.5rem; }
+.rh-companion header img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 0; flex: none; }
+.rh-name { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.2; }
+.rh-pips { display: flex; gap: 4px; flex: none; }
+.rh-pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--color-warm-2, #c9593f); }
+.rh-pip.on { background: var(--color-warm-2, #c9593f); }
+.rh-warning { margin: 0; color: var(--color-level-warning, #c9862f); opacity: 1; }
+.rh-companion input[type="checkbox"] { margin: 0; flex: none; }
+
+.rh-actions, .rh-heroics { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.rh-heroics { flex-direction: column; flex-wrap: nowrap; }
+.rh-heroic { display: flex; align-items: center; gap: 0.4rem; }
+.rh-heroic input[type="checkbox"] { margin: 0; flex: none; }
+.rh-heroic.unavailable { opacity: 0.55; }
+.rh-heroic .rh-action { flex: 1; justify-content: flex-start; }
+.rotss-heroic button.rh-action { width: auto; flex: 0 1 auto; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.6rem; min-height: 2rem; line-height: 1.2; }
+.rotss-heroic button.rh-action:disabled { opacity: 0.45; cursor: not-allowed; }
+.rh-action-name { font-weight: 600; }
+.rh-cost { display: inline-grid; place-items: center; min-width: 1.3rem; height: 1.3rem; border-radius: 50%; background: var(--color-warm-2, #c9593f); color: #fff; font-size: 0.75rem; font-weight: bold; }
+.rh-uses, .rh-ally, .rh-used { font-size: var(--font-size-11, 11px); opacity: 0.8; }
+.rh-used { margin-left: auto; }
+.rh-heroic.used .rh-action-name { text-decoration: line-through; }
+
+/* Markers and log */
+.rh-markers, .rh-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.rh-markers li, .rh-log li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; }
+.rh-markers li.hidden-marker { opacity: 0.6; font-style: italic; }
+.rh-marker-text { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.2; }
+.rh-log-round { font-size: var(--font-size-11, 11px); opacity: 0.7; min-width: 1.8rem; }
+.rh-log-text { flex: 1; min-width: 0; }
+
+/* Editor */
+.rotss-heroic-editor form, .rotss-heroic-editor .window-content { display: flex; flex-direction: column; }
+.rotss-heroic-editor-inner { display: flex; flex-direction: column; height: 100%; gap: 0.5rem; }
+.rotss-heroic-editor-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.25rem; }
+.rh-edit-companion { border: 1px solid var(--color-border, #7a7971); border-radius: 8px; padding: 0.5rem 0.75rem 0.75rem; margin: 0 0 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.rh-edit-companion legend { display: flex; align-items: center; gap: 0.4rem; padding: 0 0.25rem; }
+.rh-edit-companion legend input { font-weight: bold; width: 14rem; }
+.rh-row-tools { display: flex; gap: 0.2rem; white-space: nowrap; }
+.rh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem 0.75rem; }
+.rh-grid label { display: flex; flex-direction: column; gap: 0.2rem; font-size: var(--font-size-12, 12px); }
+.rh-grid .rh-wide { grid-column: 1 / -1; }
+.rotss-heroic label.rh-check { display: flex; flex-direction: row; align-items: center; gap: 0.35rem; font-size: var(--font-size-12, 12px); }
+.rh-edit-actions { width: 100%; border-collapse: collapse; margin: 0; }
+.rh-edit-actions th { text-align: left; font-size: var(--font-size-12, 12px); font-weight: normal; opacity: 0.8; padding: 0 0.25rem 0.2rem; }
+.rh-edit-actions td { vertical-align: top; padding: 0.3rem 0.25rem; border-top: 1px solid var(--color-border-light-tertiary, rgba(120, 120, 120, 0.3)); }
+.rh-edit-actions td input[type="text"], .rh-edit-actions textarea { width: 100%; }
+.rh-edit-actions textarea { margin-top: 0.25rem; font-family: inherit; resize: vertical; }
+.rh-edit-actions td:nth-child(2) input { width: 3.5rem; }
+.rh-limit { display: flex; flex-direction: column; gap: 0.25rem; width: 8.5rem; }
+.rh-limit input { width: 4rem; }
+.rh-editor-footer { display: flex; gap: 0.4rem; padding-top: 0.5rem; border-top: 1px solid var(--color-border, #7a7971); }
+.rh-editor-footer button { flex: 0 0 auto; width: auto; padding: 0 0.75rem; }
+.rh-editor-footer .rh-save { margin-left: auto; font-weight: bold; }
+
+/* Marker dialog */
+.rotss-heroic-form { display: flex; flex-direction: column; gap: 0.6rem; }
+.rotss-heroic-form .form-group { display: grid; grid-template-columns: 9rem 1fr; align-items: center; gap: 0.6rem; margin: 0; }
+.rotss-heroic-form .form-group.stacked { grid-template-columns: 1fr; }
+.rotss-heroic-form .form-group[hidden] { display: none; }
+.rotss-heroic-form .form-fields { display: flex; align-items: center; gap: 0.5rem; }
+.rotss-heroic-form .form-fields input:not([type="checkbox"]), .rotss-heroic-form .form-fields select { flex: 1; min-width: 0; }
+.rotss-heroic-form textarea { width: 100%; font-family: inherit; }
+.rotss-heroic-form .hint { margin: 0; font-size: var(--font-size-12, 12px); opacity: 0.8; }
+
+/* Chat */
+.rotss-heroic-card header, .rotss-heroic-reminder h3 { display: flex; align-items: center; gap: 0.5rem; }
+.rotss-heroic-card header img { width: 32px; height: 32px; border: 0; border-radius: 4px; object-fit: cover; }
+.rotss-heroic-card h3, .rotss-heroic-reminder h3 { margin: 0; font-size: 1rem; border: 0; }
+.rotss-heroic-meta { margin: 0.25rem 0; font-size: var(--font-size-12, 12px); opacity: 0.85; }
+.rotss-heroic-card footer, .rotss-heroic-reminder footer { font-size: var(--font-size-11, 11px); opacity: 0.75; margin-top: 0.25rem; }
+
+/* Marker rows in the combat tracker */
+.rotss-heroic-marker { opacity: 0.85; font-style: italic; border-left: 3px solid var(--color-warm-2, #c9593f); }
+.rotss-heroic-marker .token-initiative, .rotss-heroic-marker .initiative { opacity: 0.6; }

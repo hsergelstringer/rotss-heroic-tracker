@@ -1,0 +1,118 @@
+<div class="rotss-heroic-editor-inner">
+  <div class="rotss-heroic-editor-body">
+    <section class="rh-section">
+      <h3>Companions
+        <button type="button" class="rh-add" data-action="addCompanion"><i class="fa-solid fa-plus"></i> Companion</button>
+      </h3>
+      <p class="hint">A companion gives up its turn for a pool of companion actions. After a hero's turn, that hero spends points on one of its options. The pool refills at the start of the companion's turn (link its actor), at an initiative count (like Mirgal at 15), or each round.</p>
+
+      {{#each companions}}
+      {{#with this as |c|}}
+      <fieldset class="rh-edit-companion">
+        <legend>
+          <input type="text" name="companions.{{c.index}}.name" value="{{c.name}}" placeholder="Name" maxlength="80">
+          <span class="rh-row-tools">
+            <button type="button" class="rh-icon" data-action="move" data-list="companions" data-index="{{c.index}}" data-direction="-1" data-tooltip="Move up"><i class="fa-solid fa-arrow-up"></i></button>
+            <button type="button" class="rh-icon" data-action="move" data-list="companions" data-index="{{c.index}}" data-direction="1" data-tooltip="Move down"><i class="fa-solid fa-arrow-down"></i></button>
+            <button type="button" class="rh-icon" data-action="remove" data-list="companions" data-index="{{c.index}}" data-tooltip="Remove companion"><i class="fa-solid fa-trash"></i></button>
+          </span>
+        </legend>
+        <input type="hidden" name="companions.{{c.index}}.id" value="{{c.id}}">
+        <div class="rh-grid">
+          <label>Actor
+            <select name="companions.{{c.index}}.actorId">
+              <option value="">None</option>
+              {{#each c.actorOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+          </label>
+          <label>Actions per refresh
+            <input type="number" name="companions.{{c.index}}.points" value="{{c.points}}" min="1" max="10" step="1">
+          </label>
+          <label>Refreshes
+            <select name="companions.{{c.index}}.refresh">
+              {{#each c.refreshOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+          </label>
+          {{#if c.isCount}}
+          <label>Initiative count
+            <input type="number" name="companions.{{c.index}}.refreshCount" value="{{c.refreshCount}}" step="1">
+          </label>
+          {{/if}}
+          <label class="rh-wide">Portrait (optional)
+            <input type="text" name="companions.{{c.index}}.img" value="{{c.img}}" placeholder="Path to an image; the actor's portrait if blank">
+          </label>
+          <label class="rh-check"><input type="checkbox" name="companions.{{c.index}}.active" {{#if c.active}}checked{{/if}}> With the party</label>
+        </div>
+
+        <table class="rh-edit-actions">
+          <thead><tr><th>Action</th><th>Cost</th><th>Limited uses</th><th></th></tr></thead>
+          <tbody>
+          {{#each c.actions}}
+          <tr>
+            <td>
+              <input type="hidden" name="companions.{{c.index}}.actions.{{index}}.id" value="{{id}}">
+              <input type="text" name="companions.{{c.index}}.actions.{{index}}.name" value="{{name}}" placeholder="Name" maxlength="80">
+              <textarea name="companions.{{c.index}}.actions.{{index}}.description" rows="2" placeholder="What it does (shown on hover and in chat)">{{description}}</textarea>
+            </td>
+            <td><input type="number" name="companions.{{c.index}}.actions.{{index}}.cost" value="{{cost}}" min="1" max="10" step="1"></td>
+            <td class="rh-limit">
+              <input type="number" name="companions.{{c.index}}.actions.{{index}}.limit.uses" value="{{limit.uses}}" min="0" step="1" placeholder="∞">
+              <select name="companions.{{c.index}}.actions.{{index}}.limit.per">
+                {{#each periods}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+            </td>
+            <td class="rh-row-tools">
+              <button type="button" class="rh-icon" data-action="move" data-list="actions" data-companion="{{c.index}}" data-index="{{index}}" data-direction="-1" data-tooltip="Move up"><i class="fa-solid fa-arrow-up"></i></button>
+              <button type="button" class="rh-icon" data-action="remove" data-list="actions" data-companion="{{c.index}}" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+          {{/each}}
+          </tbody>
+        </table>
+        <button type="button" class="rh-add" data-action="addAction" data-companion="{{c.index}}"><i class="fa-solid fa-plus"></i> Action</button>
+      </fieldset>
+      {{/with}}
+      {{/each}}
+    </section>
+
+    <section class="rh-section">
+      <h3>Heroic actions
+        <button type="button" class="rh-add" data-action="addHeroic"><i class="fa-solid fa-plus"></i> Heroic action</button>
+      </h3>
+      <p class="hint">Each ally adds a heroic action. Each can be used once per round, after any creature's turn. Leave "Limited uses" blank for no limit; "2 in total" covers actions like Hallharn Fleet (2x). Untick "Available" until that ally joins the battle.</p>
+      <table class="rh-edit-actions">
+        <thead><tr><th>Heroic action</th><th>Ally</th><th>Limited uses</th><th></th></tr></thead>
+        <tbody>
+        {{#each heroics}}
+        <tr>
+          <td>
+            <input type="hidden" name="heroics.{{index}}.id" value="{{id}}">
+            <input type="text" name="heroics.{{index}}.name" value="{{name}}" placeholder="Name" maxlength="80">
+            <textarea name="heroics.{{index}}.description" rows="2" placeholder="What it does">{{description}}</textarea>
+            <label class="rh-check"><input type="checkbox" name="heroics.{{index}}.available" {{#if available}}checked{{/if}}> Available</label>
+          </td>
+          <td><input type="text" name="heroics.{{index}}.ally" value="{{ally}}" placeholder="e.g. Hallharn" maxlength="80"></td>
+          <td class="rh-limit">
+            <input type="number" name="heroics.{{index}}.limit.uses" value="{{limit.uses}}" min="0" step="1" placeholder="∞">
+            <select name="heroics.{{index}}.limit.per">
+              {{#each periods}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+          </td>
+          <td class="rh-row-tools">
+            <button type="button" class="rh-icon" data-action="move" data-list="heroics" data-index="{{index}}" data-direction="-1" data-tooltip="Move up"><i class="fa-solid fa-arrow-up"></i></button>
+            <button type="button" class="rh-icon" data-action="remove" data-list="heroics" data-index="{{index}}" data-tooltip="Remove"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+        {{/each}}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <footer class="rh-editor-footer">
+    <button type="button" data-action="importJson"><i class="fa-solid fa-file-import"></i> Import</button>
+    <button type="button" data-action="exportJson"><i class="fa-solid fa-file-export"></i> Export</button>
+    <button type="button" data-action="resetUses" data-tooltip="Restore every limited use"><i class="fa-solid fa-arrow-rotate-left"></i> Reset uses</button>
+    <button type="submit" class="rh-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+  </footer>
+</div>
