@@ -101,6 +101,22 @@ export function turnsOf(combat) {
   return (combat?.turns ?? []).map(c => ({ id: c.id, initiative: c.initiative, isMarker: isMarker(c) }));
 }
 
+/**
+ * An actor's movement as text, after dnd5e has applied conditions and
+ * encumbrance. dnd5e 6 keeps speeds in movement.speeds; earlier versions put
+ * them on movement itself.
+ */
+export function actorSpeed(actor) {
+  const movement = actor?.system?.attributes?.movement;
+  if (!movement) return null;
+  const types = CONFIG.DND5E?.movementTypes ?? {};
+  const keys = Object.keys(types).length ? Object.keys(types) : ["walk", "burrow", "climb", "fly", "swim"];
+  const source = movement.speeds ?? movement;
+  const speeds = Object.fromEntries(keys.map(k => [k, source[k]]));
+  const labels = Object.fromEntries(keys.map(k => [k, game.i18n.localize(types[k]?.label ?? k)]));
+  return Rules.formatSpeed({ speeds, units: movement.units, hover: movement.hover, special: movement.special }, labels);
+}
+
 const owns = (user, combatant) => !!combatant?.actor?.testUserPermission(user, "OWNER");
 
 /**

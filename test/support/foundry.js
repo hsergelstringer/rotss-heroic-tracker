@@ -8,6 +8,8 @@
  * after an action to let the module's reactions finish.
  */
 
+import { parseHTML } from "linkedom";
+
 let nextId = 0;
 const randomID = () => `id${(++nextId).toString().padStart(14, "0")}`;
 
@@ -145,7 +147,9 @@ class User {
 }
 
 class Actor {
-  constructor(id, name, owners = []) { Object.assign(this, { id, name, img: `actors/${id}.webp`, owners: new Set(owners) }); }
+  constructor(id, name, owners = [], movement = null) {
+    Object.assign(this, { id, name, img: `actors/${id}.webp`, owners: new Set(owners), system: { attributes: { movement } } });
+  }
   testUserPermission(user) { return user.isGM || this.owners.has(user.id); }
 }
 
@@ -163,7 +167,7 @@ export function installFoundry() {
   const actors = new Collection([
     new Actor("isen", "Isen", ["ursula"]),
     new Actor("astrid", "Astrid", ["bjorn"]),
-    new Actor("hrolf", "Hrolf"),
+    new Actor("hrolf", "Hrolf", [], { speeds: { walk: 30, swim: 30, fly: 0 }, units: "ft" }),
     new Actor("feeder", "The Feeder")
   ].map(a => [a.id, a]));
 
@@ -174,13 +178,20 @@ export function installFoundry() {
   const sent = [];
 
   const ApplicationV2 = class { static DEFAULT_OPTIONS = {}; render() {} };
+  // In Node, a linkedom DOM; in a browser (for visual checks), the real one is already there.
+  if (!globalThis.document) {
+    const { document, window } = parseHTML('<!doctype html><html><body><div id="interface"></div></body></html>');
+    Object.assign(window, { innerWidth: 1600, innerHeight: 900 });
+    Object.assign(globalThis, { document, window });
+  }
   Object.assign(globalThis, {
+    CONFIG: { DND5E: { movementTypes: { walk: { label: "Speed" }, burrow: { label: "Burrow" }, climb: { label: "Climb" }, fly: { label: "Fly" }, swim: { label: "Swim" } } } },
     Hooks,
     Handlebars: { escapeExpression: s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") },
-    ui: { notifications: { warn() {}, error() {}, info() {} } },
+    ui: { notifications: { warn() {}, error() {}, info() {} }, controls: { render() {} } },
     foundry: {
       applications: { api: { ApplicationV2, HandlebarsApplicationMixin: Base => class extends Base {}, DialogV2: {} }, instances: new Map() },
-      utils: { getProperty, setProperty, randomID }
+      utils: { getProperty, setProperty, randomID, debounce: (fn, ms) => fn }
     },
     ChatMessage: { implementation: {
       async create(data) {
@@ -195,7 +206,8 @@ export function installFoundry() {
 
   const combats = new Collection();
   globalThis.game = {
-    user: gm, users, actors, messages, combats,
+    ready: false, user: gm, users, actors, messages, combats,
+    i18n: { localize: key => key },
     get combat() { return combats.contents[0] ?? null; },
     modules: new Map([["rotss-heroic-tracker", {}]]),
     settings: {
@@ -242,5 +254,6 @@ export function installFoundry() {
 
 export const startFoundry = () => {
   Hooks.callAll("init");
+  game.ready = true;
   Hooks.callAll("ready");
 };

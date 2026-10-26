@@ -191,3 +191,20 @@ describe("markers", () => {
     assert.equal(R.normalizeMarker({ timing: "bogus" }).timing, "endOfTurn");
   });
 });
+
+describe("speed", () => {
+  test("walk first, then other speeds, skipping zero and jump", () => {
+    assert.deepEqual(R.formatSpeed({ speeds: { burrow: 0, fly: 60, jump: 7, swim: 30, walk: 30 }, units: "ft", hover: true }, { fly: "Fly", swim: "Swim" }),
+      { walk: "30 ft", text: "30 ft · fly 60 ft (hover) · swim 30 ft" });
+  });
+
+  test("special movement and other units", () => {
+    assert.deepEqual(R.formatSpeed({ speeds: { walk: 9 }, units: "m", special: "Can walk on water" }), { walk: "9 m", text: "9 m · Can walk on water" });
+  });
+
+  test("nothing to show is null; a creature that only flies leads with that", () => {
+    assert.equal(R.formatSpeed({ speeds: { walk: 0 } }), null);
+    assert.equal(R.formatSpeed(null), null);
+    assert.deepEqual(R.formatSpeed({ speeds: { walk: 0, fly: 40 } }), { walk: "fly 40 ft", text: "fly 40 ft" });
+  });
+});

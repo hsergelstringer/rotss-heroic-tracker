@@ -23,6 +23,8 @@
 .rh-companion header img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 0; flex: none; }
 .rh-name { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.2; }
 .rh-pips { display: flex; gap: 4px; flex: none; }
+.rh-speed { font-size: var(--font-size-12, 12px); }
+.rh-speed i { opacity: 0.7; }
 .rh-pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--color-warm-2, #c9593f); }
 .rh-pip.on { background: var(--color-warm-2, #c9593f); }
 .rh-warning { margin: 0; color: var(--color-level-warning, #c9862f); opacity: 1; }
@@ -94,3 +96,38 @@
 /* Marker rows in the combat tracker */
 .rotss-heroic-marker { opacity: 0.85; font-style: italic; border-left: 3px solid var(--color-warm-2, #c9593f); }
 .rotss-heroic-marker .token-initiative, .rotss-heroic-marker .initiative { opacity: 0.6; }
+
+/* Companions panel on the canvas */
+.rotss-heroic-widget {
+  position: fixed; z-index: 35; width: 250px; max-height: 70vh; display: flex; flex-direction: column;
+  color: #f0ece4; background: rgba(20, 22, 30, 0.88); border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45); pointer-events: auto; font-size: 13px;
+}
+.rotss-heroic-widget.dragging { opacity: 0.85; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); }
+.rhw-head { display: flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.4rem 0.3rem 0.5rem; cursor: grab; user-select: none; touch-action: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.dragging .rhw-head { cursor: grabbing; }
+.rhw-grip { opacity: 0.5; font-size: 11px; }
+.rhw-title { flex: 1; font-weight: bold; letter-spacing: 0.02em; }
+.rhw-head button { width: 22px; height: 22px; min-height: 0; padding: 0; flex: none; border: 0; background: transparent; color: inherit; opacity: 0.75; font-size: 12px; line-height: 1; }
+.rhw-head button:hover { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+.rhw-body { overflow-y: auto; padding: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.rhw-card { display: flex; flex-direction: column; gap: 0.3rem; padding: 0.3rem; border-radius: 6px; background: rgba(255, 255, 255, 0.05); }
+.rhw-row { display: flex; align-items: center; gap: 0.45rem; }
+.rhw-row img, .rhw-initial { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; border: 0; flex: none; }
+.rhw-initial { display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); font-weight: bold; }
+.rhw-main { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+.rhw-main strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhw-speed { font-size: 11px; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rhw-pips { display: flex; gap: 3px; flex: none; }
+.rhw-pip { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #e8c26a; }
+.rhw-pip.on { background: #e8c26a; }
+.rhw-actions { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.rhw-actions button {
+  width: auto; flex: 0 1 auto; display: inline-flex; align-items: center; gap: 0.3rem; min-height: 0; padding: 0.15rem 0.45rem;
+  font-size: 12px; line-height: 1.3; color: inherit; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 4px;
+}
+.rhw-actions button:hover:not(:disabled) { background: rgba(232, 194, 106, 0.25); border-color: #e8c26a; }
+.rhw-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.rhw-cost { display: inline-grid; place-items: center; min-width: 15px; height: 15px; border-radius: 50%; background: #e8c26a; color: #1a1610; font-size: 10px; font-weight: bold; }
+.rotss-heroic-widget.collapsed { width: auto; min-width: 170px; }
+.rotss-heroic-widget.collapsed .rhw-row img, .rotss-heroic-widget.collapsed .rhw-initial { width: 24px; height: 24px; }

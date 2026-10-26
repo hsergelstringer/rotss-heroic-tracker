@@ -6,6 +6,7 @@
 import * as Rules from "./rules.js";
 import * as Core from "./core.js";
 import * as Markers from "./markers.js";
+import * as View from "./view.js";
 import { request } from "./requests.js";
 
 const { MODULE_ID } = Core;
@@ -61,45 +62,15 @@ export class HeroicTracker extends HandlebarsApplicationMixin(ApplicationV2) {
     const usage = Core.getUsage();
     const mayCompanion = Core.mayUse(combat, user, "companion");
     const mayHeroic = Core.mayUse(combat, user, "heroic");
-    const inCombat = new Set((combat?.combatants.contents ?? []).map(c => c.actorId).filter(Boolean));
 
-    const usesLabel = (limit, key) => {
-      const left = Rules.usesLeft(limit, key, state, usage);
-      return left === null ? "" : `${left}/${limit.uses} ${Rules.LIMIT_PERIODS[limit.per]}`;
-    };
-    const verdict = (may, request) => {
-      if (!combat) return { disabled: true, reason: "Start a combat to use actions." };
-      if (!may.ok) return { disabled: true, reason: may.reason };
-      const check = Rules.check(library, state, usage, request);
-      return check.ok ? { disabled: false, reason: "" } : { disabled: true, reason: check.reason };
-    };
-
-    const companions = library.companions.filter(c => isGM || c.active).map(c => {
-      const left = Rules.pointsLeft(c, state);
-      let refreshLabel = c.refresh === "count" ? `Refreshes at initiative ${c.refreshCount}` : c.refresh === "round" ? "Refreshes each round" : "Refreshes on its turn";
-      let warning = "";
-      if (c.refresh === "turn" && !c.actorId) warning = "Not linked to an actor, so it only refreshes by hand.";
-      else if (c.refresh === "turn" && combat && !inCombat.has(c.actorId)) warning = "Its actor isn't in this combat, so it only refreshes by hand.";
-      return {
-        ...c,
-        img: c.img || game.actors.get(c.actorId)?.img || "",
-        left,
-        pips: Array.from({ length: c.points }, (_, i) => ({ on: i < left })),
-        refreshLabel,
-        warning,
-        actions: c.actions.map(a => ({
-          ...a,
-          usesLabel: usesLabel(a.limit, Rules.companionKey(c.id, a.id)),
-          ...verdict(mayCompanion, { kind: "companion", companionId: c.id, actionId: a.id })
-        }))
-      };
-    });
+    const verdictFor = (may, req) => View.verdict(combat, library, state, usage, may, req);
+    const companions = View.companionCards(combat, user, { includeInactive: isGM });
 
     const heroics = library.heroics.filter(h => isGM || h.available).map(h => ({
       ...h,
       used: state.usedThisRound.includes(h.id),
-      usesLabel: usesLabel(h.limit, Rules.heroicKey(h.id)),
-      ...verdict(mayHeroic, { kind: "heroic", heroicId: h.id })
+      usesLabel: View.usesLabel(h.limit, Rules.heroicKey(h.id), state, usage),
+      ...verdictFor(mayHeroic, { kind: "heroic", heroicId: h.id })
     }));
 
     const markers = Markers.markersIn(combat)

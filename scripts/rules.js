@@ -383,3 +383,34 @@ export function normalizeMarker(input) {
     refreshCompanionId: str(input.refreshCompanionId, 40) || null
   };
 }
+
+/* -------------------------------------------- */
+/*  Speed                                       */
+/* -------------------------------------------- */
+
+/**
+ * A creature's movement as short text, e.g. "30 ft · fly 60 ft (hover) · swim 30 ft".
+ * @param {object} movement  { speeds: { walk, fly, … }, units, hover, special }
+ * @param {object} [labels]  Movement type labels by key, e.g. { fly: "Fly" }
+ * @returns {{ walk: string, text: string }|null}  null when there's nothing to show
+ */
+export function formatSpeed(movement, labels = {}) {
+  if (!movement) return null;
+  const speeds = movement.speeds ?? {};
+  const unit = movement.units || "ft";
+  const parts = [];
+  let walk = "";
+  for (const [key, raw] of Object.entries(speeds)) {
+    const value = Number(raw);
+    if (!(value > 0) || key === "jump") continue;
+    if (key === "walk") {
+      walk = `${value} ${unit}`;
+      parts.unshift(walk);
+      continue;
+    }
+    const label = String(labels[key] ?? key).toLowerCase();
+    parts.push(`${label} ${value} ${unit}${key === "fly" && movement.hover ? " (hover)" : ""}`);
+  }
+  if (movement.special) parts.push(String(movement.special).trim());
+  return parts.length ? { walk: walk || parts[0], text: parts.join(" · ") } : null;
+}

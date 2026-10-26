@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.1.0
+## 0.0.2
+
+- A companions panel on the canvas: the companions with the party, with their portrait, speed, actions left and, during combat, their action buttons. Drag it by its header; collapse it to portraits and pips; show or hide it from the Token controls, the module settings or its × button. Position, collapsed and shown are remembered per browser.
+- Companions linked to an actor show its movement (walk, fly, swim, climb, burrow, hover and special movement) in the panel and the tracker window, as dnd5e calculates it, so conditions and encumbrance are included.
+
+## 0.0.1
 
 First version.
 

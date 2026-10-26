@@ -16,14 +16,22 @@ import * as Core from "./core.js";
 import * as Markers from "./markers.js";
 import { HeroicTracker, LibraryEditor, markerDialog } from "./apps.js";
 import { listen, request } from "./requests.js";
+import * as Widget from "./widget.js";
 
 const { MODULE_ID } = Core;
 
+/** Redraw everything that shows companion and heroic action state. */
+function refreshViews() {
+  HeroicTracker.refresh();
+  Widget.render();
+}
+
 Hooks.once("init", () => {
   Core.registerSettings(() => {
-    HeroicTracker.refresh();
+    refreshViews();
     Markers.syncRefreshMarkers(game.combat);
   });
+  Widget.registerWidgetSettings();
 
   game.modules.get(MODULE_ID).api = {
     open: () => HeroicTracker.open(),
@@ -36,12 +44,16 @@ Hooks.once("init", () => {
       const input = await markerDialog(game.combat, { anchorId });
       if (input) await request("addMarker", { combatId: game.combat.id, input });
     },
-    getLibrary: Core.getLibrary
+    getLibrary: Core.getLibrary,
+    /** Show or hide the companions panel on the canvas, for this browser. */
+    toggleWidget: shown => Widget.setShown(shown ?? !Widget.isShown())
   };
 });
 
 Hooks.once("ready", () => {
   listen();
+  Widget.watchResize();
+  Widget.render();
   if (Core.isActiveGM()) Markers.syncRefreshMarkers(game.combat);
 });
 
@@ -51,17 +63,22 @@ Hooks.once("ready", () => {
 
 Hooks.on("updateCombat", (combat, changed, options) => {
   Markers.onUpdateCombat(combat, changed, options).catch(err => console.error(`${MODULE_ID} | turn change failed`, err));
-  HeroicTracker.refresh();
+  refreshViews();
 });
 Hooks.on("updateCombatant", (combatant, changed) => {
   Markers.onUpdateCombatant(combatant, changed).catch(err => console.error(`${MODULE_ID} | marker reposition failed`, err));
-  HeroicTracker.refresh();
+  refreshViews();
 });
 Hooks.on("deleteCombatant", combatant => {
   Markers.onDeleteCombatant(combatant).catch(err => console.error(`${MODULE_ID} | marker update failed`, err));
-  HeroicTracker.refresh();
+  refreshViews();
 });
-for (const hook of ["createCombatant", "createCombat", "deleteCombat"]) Hooks.on(hook, () => HeroicTracker.refresh());
+for (const hook of ["createCombatant", "createCombat", "deleteCombat"]) Hooks.on(hook, () => refreshViews());
+
+// A linked actor's speed or portrait changed (a condition, a spell, a new image).
+Hooks.on("updateActor", actor => {
+  if (Core.getLibrary().companions.some(c => c.actorId === actor.id)) refreshViews();
+});
 Hooks.on("combatStart", combat => {
   if (Core.isActiveGM()) Markers.syncRefreshMarkers(combat);
 });
@@ -111,5 +128,15 @@ Hooks.on("getSceneControlButtons", controls => {
     button: true,
     visible: true,
     onChange: () => HeroicTracker.open()
+  };
+  tokens.tools.rotssHeroicWidget = {
+    name: "rotssHeroicWidget",
+    title: "Companions panel",
+    icon: "fa-solid fa-people-group",
+    order: Object.keys(tokens.tools).length,
+    toggle: true,
+    active: Widget.isShown(),
+    visible: true,
+    onChange: (event, active) => Widget.setShown(active)
   };
 });

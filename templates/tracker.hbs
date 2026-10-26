@@ -32,6 +32,7 @@
         {{#if img}}<img src="{{img}}" alt="">{{/if}}
         <div class="rh-name">
           <strong>{{name}}</strong>
+          {{#if speed}}<span class="rh-speed" data-tooltip="Speed"><i class="fa-solid fa-person-running"></i> {{speed.text}}</span>{{/if}}
           <span class="hint">{{refreshLabel}}</span>
         </div>
         <span class="rh-pips" data-tooltip="{{left}} of {{points}} actions left">

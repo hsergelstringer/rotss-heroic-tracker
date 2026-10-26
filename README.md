@@ -5,6 +5,7 @@ A Foundry VTT (v13–v14) module for running *Raiders of the Serpent Sea*'s help
 - **Companion actions** (Companion Rules, Chapter 1; each companion in Appendix D). A companion gives up its turn for a pool of companion actions, usually 3. At the end of a hero's turn, that hero spends points on one of the companion's options, some of which cost 2 or 3. The pool refills at the start of the companion's turn, or for Mirgal at initiative count 15.
 - **Heroic actions** (Chapter 12, Ragnarök). Each ally adds one. Each can be used once per round, after any creature's turn, and some have a limited number of uses (Hallharn Fleet, 2x).
 - **Effect markers**: reminders in the initiative order, such as "the Feeder is stunned until the end of its next turn". When the tracker reaches one, it posts the reminder and moves on.
+- **A companions panel** on the canvas with each companion's speed, actions left and action buttons, which anyone can move or hide.
 
 The module comes empty: you enter the companions and heroic actions you use, with your own wording.
 
@@ -26,6 +27,24 @@ Open **Heroic & Companion Actions** from the shield button in the **Token contro
 
   The ↻ button refills a pool by hand.
 - **With the party** (the checkbox next to a companion) hides companions that aren't present. **Available** (next to a heroic action) is for allies that haven't joined the battle yet.
+
+**Companions panel**
+
+A small panel on the canvas lists the companions who are with the party. Each card has:
+
+- the portrait (the linked actor's, unless you set one)
+- the movement speed, from the linked actor as dnd5e works it out, so conditions and encumbrance are counted
+- the actions left as pips
+- during combat, the companion's action buttons, with the same rules as the tracker window. A greyed-out button explains why on hover.
+
+How to use it:
+
+- **Move:** drag it by its header.
+- **Collapse:** the chevron shrinks it to portraits and pips.
+- **Hide:** use × or the **Companions panel** toggle in the Token controls, which also brings it back.
+- **Open the tracker:** the shield button.
+
+Each person's position, collapsed state and whether it's shown are kept in their own browser, and the setting **Show the companions panel on the canvas** sets the same. The panel disappears when no companion is with the party.
 
 **Effect markers**
 
@@ -67,6 +86,7 @@ Use ✎ in the tracker window (GM only) to open the editor.
 | Who can use companion actions | Players, during or just after their own turn | Or players at any time, or only the GM. Heroic actions are open to any player unless only the GM can use actions. |
 | Players can add effect markers | On | Lets players add reminders |
 | Post used actions to chat | On | A chat card for each use |
+| Show the companions panel on the canvas | On | Per person; also the Token controls toggle |
 
 ## For macros
 
@@ -75,6 +95,7 @@ const api = game.modules.get("rotss-heroic-tracker").api;
 api.open();                     // the tracker window
 api.edit();                     // the editor (GM)
 api.markerDialog(combatantId);  // the add-marker dialog, anchored to a combatant
+api.toggleWidget();             // show or hide the companions panel (or pass true/false)
 await api.addMarker({ text: "Feeder stunned", timing: "endOfTurn", anchorId: combatantId });
 // timing: "endOfTurn", "startOfTurn", "startOfRound" or "count" (with count: 15); repeat: true, rounds: 10
 ```
@@ -97,5 +118,10 @@ The rules live in `scripts/rules.js` with no Foundry dependencies. `npm test` (N
   - refreshes, including Mirgal's count marker
   - markers placing, skipping, arming, firing, repeating and following their anchor
   - hidden markers, settings, and dnd5e's recovery skip
+- **Panel tests:** render the companions panel in a simulated DOM. They cover:
+  - which companions are listed, their portraits, speeds and pips
+  - action buttons and who can use them, including clicking one
+  - collapsing, hiding and keeping it on screen
+  - updates when an actor's speed changes, and escaping of names
 
 To develop, symlink this folder into Foundry's `Data/modules/rotss-heroic-tracker`. To release, publish a GitHub release tagged `vX.Y.Z`; the workflow runs the tests and attaches `module.zip` and `module.json`.
