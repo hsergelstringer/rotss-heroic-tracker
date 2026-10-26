@@ -12,7 +12,7 @@
  */
 
 import * as Rules from "./rules.js";
-import { MODULE_ID, activeGM, getCombatState, getLibrary, isActiveGM, isMarker, mutate, postReminder, refreshCompanion, serially, turnsOf } from "./core.js";
+import { MODULE_ID, activeGM, getCombatState, getLibrary, isActiveGM, isMarker, mutate, postRefreshNote, postReminder, serially, turnsOf } from "./core.js";
 
 const ICON = "icons/svg/clockwork.svg";
 
@@ -85,14 +85,28 @@ async function reach(combat, combatant, direction) {
 
   const marker = markerOf(combatant);
   const outcome = Rules.reachMarker(marker);
-  if (outcome.fire) {
-    if (marker.refreshCompanionId) await refreshCompanion(combat, marker.refreshCompanionId);
-    await postReminder(marker, describeMarker(combat, marker));
-  }
+  // Refresh markers are only reminders: the refill itself happens in refreshAtCount.
+  if (outcome.fire && !marker.refreshCompanionId) await postReminder(marker, describeMarker(combat, marker));
   // Move on first: deleting the current combatant would shift the turn order under us.
   await combat.nextTurn();
   if (outcome.remove) await combatant.delete();
   else if (outcome.update) await combatant.setFlag(MODULE_ID, "marker", { ...marker, ...outcome.update });
+}
+
+/**
+ * Refill companions that refresh at an initiative count, once a round, when
+ * the turn passes their count (see Rules.countRefreshes), and tell the GM.
+ */
+async function refreshAtCount(combat, combatant, newRound) {
+  const library = getLibrary();
+  if (!library.companions.some(c => c.active && c.refresh === "count")) return;
+  let refreshed = [];
+  await mutate(combat, state => {
+    const result = Rules.countRefreshes(library, state, { round: combat.round, initiative: combatant.initiative, newRound });
+    refreshed = result.refreshed;
+    return refreshed.length ? { state: result.state } : {};
+  });
+  for (const companion of refreshed) await postRefreshNote(companion);
 }
 
 /** A real combatant's turn started: refill linked companions and arm "end of next turn" markers. */
@@ -126,14 +140,17 @@ export async function onUpdateCombat(combat, changed, options = {}) {
     ?? (last && (combat.round < last.round || (combat.round === last.round && combat.turn < last.turn)) ? -1 : 1);
 
   const library = getLibrary();
+  let newRound = false;
   if (combat.round > getCombatState(combat).round) {
     const { state } = await mutate(combat, current =>
       (current.round < combat.round ? { state: Rules.startRound(library, current, combat.round) } : {}));
+    newRound = !!state;
     if (state) await syncRefreshMarkers(combat);
   }
 
   const combatant = combat.combatant;
   if (!combatant) return;
+  if (direction > 0) await refreshAtCount(combat, combatant, newRound);
   if (isMarker(combatant)) await reach(combat, combatant, direction);
   else if (direction > 0) await turnStarted(combat, combatant);
 }

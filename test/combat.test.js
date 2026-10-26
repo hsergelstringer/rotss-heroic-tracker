@@ -69,6 +69,33 @@ describe("refresh markers", () => {
   });
 });
 
+describe("refreshing at an initiative count without the marker", () => {
+  test("still refills if the marker row has been deleted", async () => {
+    await markerNamed("Mirgal regains actions").delete();
+    await settle();
+    await spend({ kind: "companion", companionId: "mirgal", actionId: "cast" });
+    await next(); // Hrolf, 17
+    assert.equal(state().spent.mirgal, 1);
+    await next(); // the Feeder, 12: past 15
+    assert.equal(state().spent.mirgal, undefined);
+  });
+
+  test("still refills if the GM jumps straight past the count", async () => {
+    await spend({ kind: "companion", companionId: "mirgal", actionId: "cast" });
+    const astrid = combat.turns.findIndex(c => c.name === "Astrid");
+    await combat.update({ turn: astrid }, { direction: 1 });
+    await settle();
+    assert.equal(state().spent.mirgal, undefined);
+  });
+
+  test("only once a round, however many turns pass below the count", async () => {
+    await next(); await next(); // the Feeder: refilled
+    await spend({ kind: "companion", companionId: "mirgal", actionId: "cast" });
+    await next(); // Astrid, still round 1
+    assert.equal(state().spent.mirgal, 1);
+  });
+});
+
 describe("companion actions", () => {
   test("refill at the start of the companion's own turn", async () => {
     await spend({ kind: "companion", companionId: "hrolf", actionId: "attack" });

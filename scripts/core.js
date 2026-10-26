@@ -194,6 +194,18 @@ export async function postUseCard(library, state, usage, entry) {
   });
 }
 
+/** Tell the GM a companion's pool refilled. */
+export async function postRefreshNote(companion) {
+  await ChatMessage.implementation.create({
+    speaker: { alias: companion.name },
+    whisper: game.users.filter(u => u.isGM).map(u => u.id),
+    content: `<div class="rotss-heroic-reminder">
+      <h3><i class="fa-solid fa-rotate"></i> ${esc(companion.name)} regains actions</h3>
+      <footer>${companion.points} actions, at initiative ${companion.refreshCount}</footer>
+    </div>`
+  });
+}
+
 export async function postReminder(marker, timing) {
   const gmOnly = marker.hidden || !!marker.refreshCompanionId;
   await ChatMessage.implementation.create({
@@ -236,6 +248,11 @@ export async function performUndo(combat, entryId) {
 
 export function refreshCompanion(combat, companionId) {
   return mutate(combat, state => ({ state: Rules.refreshCompanion(state, companionId) }));
+}
+
+/** Let every heroic action be used again this round (the GM's fix for a mistaken use or a missed round). */
+export function resetRound(combat) {
+  return mutate(combat, state => ({ state: { ...state, usedThisRound: [] } }));
 }
 
 export function longRest() {

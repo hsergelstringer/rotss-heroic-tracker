@@ -46,7 +46,8 @@ Hooks.once("init", () => {
     },
     getLibrary: Core.getLibrary,
     /** Show or hide the companions panel on the canvas, for this browser. */
-    toggleWidget: shown => Widget.setShown(shown ?? !Widget.isShown())
+    /** Show or hide a canvas panel for this browser: "companions" or "heroics". */
+    toggleWidget: (shown, kind = "companions") => Widget.setShown(shown ?? !Widget.isShown(kind), kind)
   };
 });
 
@@ -135,8 +136,18 @@ Hooks.on("getSceneControlButtons", controls => {
     icon: "fa-solid fa-people-group",
     order: Object.keys(tokens.tools).length,
     toggle: true,
-    active: Widget.isShown(),
+    active: Widget.isShown("companions"),
     visible: true,
-    onChange: (event, active) => Widget.setShown(active)
+    onChange: (event, active) => Widget.setShown(active, "companions")
+  };
+  tokens.tools.rotssHeroicHeroicsWidget = {
+    name: "rotssHeroicHeroicsWidget",
+    title: "Heroic actions panel",
+    icon: "fa-solid fa-khanda",
+    order: Object.keys(tokens.tools).length,
+    toggle: true,
+    active: Widget.isShown("heroics"),
+    visible: true,
+    onChange: (event, active) => Widget.setShown(active, "heroics")
   };
 });

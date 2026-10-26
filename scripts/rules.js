@@ -104,7 +104,8 @@ export function normalizeLibrary(input = {}) {
  * Uses of "per rest" and "in total" actions outlive the combat and are kept
  * separately (`usage`).
  */
-export const emptyCombatState = () => ({ round: 0, spent: {}, usedThisRound: [], uses: {}, log: [] });
+/** countRefreshed: the round each "at an initiative count" companion last refilled in. */
+export const emptyCombatState = () => ({ round: 0, spent: {}, usedThisRound: [], uses: {}, log: [], countRefreshed: {} });
 
 export function normalizeCombatState(state) {
   return { ...emptyCombatState(), ...(state ?? {}) };
@@ -238,6 +239,35 @@ export function startRound(library, state, round) {
     if (companion.refresh === "round") delete next.spent[companion.id];
   }
   return next;
+}
+
+/**
+ * Refills for companions that refresh at an initiative count, like Mirgal at
+ * 15. The count comes after anyone on that number, so a companion refills,
+ * once a round, when the turn first reaches someone below it. If a whole round
+ * passes without anyone below it, it refills as the next round starts.
+ *
+ * This doesn't depend on the tracker stopping on the count's marker, which is
+ * only a reminder.
+ *
+ * @param {object} context  { round, initiative, newRound }: the turn just reached
+ * @returns {{ state: object, refreshed: object[] }}
+ */
+export function countRefreshes(library, state, { round, initiative, newRound = false }) {
+  const next = structuredClone(state);
+  next.countRefreshed ??= {};
+  const refreshed = [];
+  for (const companion of library.companions) {
+    if (!companion.active || companion.refresh !== "count") continue;
+    const last = next.countRefreshed[companion.id] ?? 0;
+    const missedLastRound = newRound && round > 1 && last < round - 1;
+    const reachedCount = initiative !== null && initiative !== undefined && Number(initiative) < companion.refreshCount && last < round;
+    if (!missedLastRound && !reachedCount) continue;
+    delete next.spent[companion.id];
+    next.countRefreshed[companion.id] = reachedCount ? round : round - 1;
+    refreshed.push(companion);
+  }
+  return { state: next, refreshed };
 }
 
 /** A combatant's turn started: companions linked to its actor refill. Returns the companions refreshed too. */

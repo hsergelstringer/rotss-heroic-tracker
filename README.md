@@ -5,7 +5,7 @@ A Foundry VTT (v13–v14) module for running *Raiders of the Serpent Sea*'s help
 - **Companion actions** (Companion Rules, Chapter 1; each companion in Appendix D). A companion gives up its turn for a pool of companion actions, usually 3. At the end of a hero's turn, that hero spends points on one of the companion's options, some of which cost 2 or 3. The pool refills at the start of the companion's turn, or for Mirgal at initiative count 15.
 - **Heroic actions** (Chapter 12, Ragnarök). Each ally adds one. Each can be used once per round, after any creature's turn, and some have a limited number of uses (Hallharn Fleet, 2x).
 - **Effect markers**: reminders in the initiative order, such as "the Feeder is stunned until the end of its next turn". When the tracker reaches one, it posts the reminder and moves on.
-- **A companions panel** on the canvas with each companion's speed, actions left and action buttons, which anyone can move or hide.
+- **Canvas panels** for the companions (speed, actions left, action buttons) and the heroic actions (uses left, used this round, Use buttons), which each person can move or hide.
 
 The module comes empty: you enter the companions and heroic actions you use, with your own wording.
 
@@ -22,7 +22,7 @@ Open **Heroic & Companion Actions** from the shield button in the **Token contro
 - Each use posts a **chat card** with the action's description and what's left. The **Used this combat** list lets the GM undo a use, which also removes its card.
 - Pools refill by themselves:
   - **At the start of its turn:** link the companion to its actor, and add that actor to the combat.
-  - **At an initiative count:** the module adds a repeating marker at that count. When it's reached, the pool refills and the GM gets a whisper.
+  - **At an initiative count:** once a round, as soon as the turn reaches someone below the count (so it comes after anyone on that number). This doesn't depend on the tracker stopping anywhere. If nobody acts below the count in a round, the pool refills as the next round starts. A repeating "regains actions" marker shows where the count is, and the GM gets a whisper when it refills.
   - **Each round:** at the start of every round.
 
   The ↻ button refills a pool by hand.
@@ -43,6 +43,17 @@ How to use it:
 - **Collapse:** the chevron shrinks it to portraits and pips.
 - **Hide:** use × or the **Companions panel** toggle in the Token controls, which also brings it back.
 - **Open the tracker:** the shield button.
+- **Refresh (GM):** the ↻ on a card refills that companion's actions.
+
+**Heroic actions panel**
+
+A second panel lists the heroic actions available to the party. Each one shows:
+
+- its ally, and its uses left if it has a limit
+- "this round", struck through, once it's been used this round
+- a **Use** button, which follows the same rules as the tracker window
+
+The header shows the round. The GM's ↻ in the header lets every heroic action be used again this round, to fix a mistaken use. The panel moves, collapses and hides on its own, with its own **Heroic actions panel** toggle in the Token controls. It disappears when no heroic action is available.
 
 Each person's position, collapsed state and whether it's shown are kept in their own browser, and the setting **Show the companions panel on the canvas** sets the same. The panel disappears when no companion is with the party.
 
@@ -87,6 +98,7 @@ Use ✎ in the tracker window (GM only) to open the editor.
 | Players can add effect markers | On | Lets players add reminders |
 | Post used actions to chat | On | A chat card for each use |
 | Show the companions panel on the canvas | On | Per person; also the Token controls toggle |
+| Show the heroic actions panel on the canvas | On | Per person; also the Token controls toggle |
 
 ## For macros
 
@@ -95,7 +107,8 @@ const api = game.modules.get("rotss-heroic-tracker").api;
 api.open();                     // the tracker window
 api.edit();                     // the editor (GM)
 api.markerDialog(combatantId);  // the add-marker dialog, anchored to a combatant
-api.toggleWidget();             // show or hide the companions panel (or pass true/false)
+api.toggleWidget();                     // show or hide the companions panel (or pass true/false)
+api.toggleWidget(undefined, "heroics"); // the heroic actions panel
 await api.addMarker({ text: "Feeder stunned", timing: "endOfTurn", anchorId: combatantId });
 // timing: "endOfTurn", "startOfTurn", "startOfRound" or "count" (with count: 15); repeat: true, rounds: 10
 ```
@@ -115,13 +128,15 @@ The rules live in `scripts/rules.js` with no Foundry dependencies. `npm test` (N
 - **Rules tests:** pools, costs, refreshes, round limits, limited uses, undo, turn order and marker timing.
 - **Combat tests:** load the real module into a simulated Foundry and play through combats. They cover:
   - players spending on and after their turn
-  - refreshes, including Mirgal's count marker
+  - refreshes, including at an initiative count even when the marker is gone or skipped
   - markers placing, skipping, arming, firing, repeating and following their anchor
   - hidden markers, settings, and dnd5e's recovery skip
-- **Panel tests:** render the companions panel in a simulated DOM. They cover:
+- **Panel tests:** render both canvas panels in a simulated DOM. They cover:
   - which companions are listed, their portraits, speeds and pips
   - action buttons and who can use them, including clicking one
-  - collapsing, hiding and keeping it on screen
+  - the GM's refresh buttons, which players don't get
+  - the heroic actions panel: listing, using, the round reset, and hiding it on its own
+  - collapsing, hiding and keeping panels on screen
   - updates when an actor's speed changes, and escaping of names
 
 To develop, symlink this folder into Foundry's `Data/modules/rotss-heroic-tracker`. To release, publish a GitHub release tagged `vX.Y.Z`; the workflow runs the tests and attaches `module.zip` and `module.json`.

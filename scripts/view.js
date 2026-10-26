@@ -55,3 +55,17 @@ export function companionCards(combat, user, { includeInactive = false } = {}) {
     };
   });
 }
+
+/** Heroic actions as cards. Players see only the available ones. */
+export function heroicCards(combat, user, { includeUnavailable = false } = {}) {
+  const library = Core.getLibrary();
+  const state = Core.getCombatState(combat);
+  const usage = Core.getUsage();
+  const may = Core.mayUse(combat, user, "heroic");
+  return library.heroics.filter(h => includeUnavailable || h.available).map(h => ({
+    ...h,
+    used: state.usedThisRound.includes(h.id),
+    usesLabel: usesLabel(h.limit, Rules.heroicKey(h.id), state, usage),
+    ...verdict(combat, library, state, usage, may, { kind: "heroic", heroicId: h.id })
+  }));
+}

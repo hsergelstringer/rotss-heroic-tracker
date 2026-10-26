@@ -44,6 +44,11 @@ const HANDLERS = {
     return Core.refreshCompanion(combatFor(combatId), companionId);
   },
 
+  resetRound(user, { combatId }) {
+    gmOnly(user);
+    return Core.resetRound(combatFor(combatId));
+  },
+
   async setActive(user, { companionId, active }) {
     gmOnly(user);
     const library = Core.getLibrary();

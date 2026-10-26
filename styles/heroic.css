@@ -131,3 +131,14 @@
 .rhw-cost { display: inline-grid; place-items: center; min-width: 15px; height: 15px; border-radius: 50%; background: #e8c26a; color: #1a1610; font-size: 10px; font-weight: bold; }
 .rotss-heroic-widget.collapsed { width: auto; min-width: 170px; }
 .rotss-heroic-widget.collapsed .rhw-row img, .rotss-heroic-widget.collapsed .rhw-initial { width: 24px; height: 24px; }
+.rotss-heroic-widget.collapsed .rhw-heroic .rhw-main { flex: 1; }
+.rhw-row > button.rhw-refresh, .rhw-row > button.rhw-use { width: auto; flex: none; min-height: 0; color: inherit; border-radius: 4px; }
+.rhw-row > button.rhw-refresh { width: 22px; height: 22px; padding: 0; border: 0; background: transparent; opacity: 0.7; font-size: 11px; }
+.rhw-row > button.rhw-refresh:hover:not(:disabled) { opacity: 1; background: rgba(255, 255, 255, 0.12); }
+.rhw-row > button.rhw-refresh:disabled { opacity: 0.25; }
+.rhw-row > button.rhw-use { padding: 0.15rem 0.55rem; font-size: 12px; background: rgba(232, 194, 106, 0.2); border: 1px solid #e8c26a; }
+.rhw-row > button.rhw-use:hover:not(:disabled) { background: rgba(232, 194, 106, 0.4); }
+.rhw-row > button.rhw-use:disabled { opacity: 0.4; cursor: not-allowed; border-color: rgba(255, 255, 255, 0.2); background: transparent; }
+.rhw-heroic.used strong { text-decoration: line-through; opacity: 0.7; }
+.rhw-used { font-size: 11px; opacity: 0.8; white-space: nowrap; }
+.rhw-round { font-weight: normal; font-size: 11px; opacity: 0.7; margin-left: 0.25rem; }

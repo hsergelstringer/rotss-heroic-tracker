@@ -83,6 +83,42 @@ describe("companion actions", () => {
   });
 });
 
+describe("refreshing at an initiative count", () => {
+  const spent = state => R.spend(library, state, {}, companion("mirgal", "cast")).state;
+
+  test("refills once a round, when the turn first reaches someone below the count", () => {
+    let state = spent(R.emptyCombatState());
+    let result = R.countRefreshes(library, state, { round: 1, initiative: 20 });
+    assert.deepEqual(result.refreshed, [], "above 15: not yet");
+    result = R.countRefreshes(library, state, { round: 1, initiative: 15 });
+    assert.deepEqual(result.refreshed, [], "on 15: the count comes after them");
+    result = R.countRefreshes(library, state, { round: 1, initiative: 12 });
+    assert.deepEqual(result.refreshed.map(c => c.id), ["mirgal"]);
+    state = spent(result.state);
+    result = R.countRefreshes(library, state, { round: 1, initiative: 8 });
+    assert.deepEqual(result.refreshed, [], "only once a round");
+    assert.equal(result.state.spent.mirgal, 1);
+    result = R.countRefreshes(library, result.state, { round: 2, initiative: 10, newRound: true });
+    assert.deepEqual(result.refreshed.map(c => c.id), ["mirgal"], "and again next round");
+  });
+
+  test("a round with nobody below the count refills as the next round starts", () => {
+    const state = spent(R.emptyCombatState());
+    let result = R.countRefreshes(library, state, { round: 1, initiative: 18 });
+    assert.deepEqual(result.refreshed, []);
+    result = R.countRefreshes(library, result.state, { round: 2, initiative: 20, newRound: true });
+    assert.deepEqual(result.refreshed.map(c => c.id), ["mirgal"]);
+    assert.equal(result.state.countRefreshed.mirgal, 1, "counted as last round's refill");
+    result = R.countRefreshes(library, spent(result.state), { round: 2, initiative: 3 });
+    assert.deepEqual(result.refreshed.map(c => c.id), ["mirgal"], "this round's still to come");
+  });
+
+  test("ignores companions away from the party and other refresh kinds", () => {
+    const lib = R.normalizeLibrary({ companions: [{ ...library.companions[1], active: false }, library.companions[0]] });
+    assert.deepEqual(R.countRefreshes(lib, R.emptyCombatState(), { round: 1, initiative: 1 }).refreshed, []);
+  });
+});
+
 describe("heroic actions", () => {
   test("once per round each", () => {
     let { state } = R.spend(library, R.emptyCombatState(), {}, heroic("surge"));

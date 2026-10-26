@@ -130,3 +130,93 @@ describe("companions panel", () => {
     assert.equal(panel().querySelectorAll("script, img[onerror]").length, 0);
   });
 });
+
+describe("GM refresh on the companions panel", () => {
+  test("the GM can refill a companion's actions from its card", async () => {
+    await startCombat();
+    card("Hrolf").querySelector("[data-action-id=attack]").click();
+    await settle();
+    assert.equal(card("Hrolf").querySelectorAll(".rhw-pip.on").length, 1);
+    card("Hrolf").querySelector("[data-rhw=refresh]").click();
+    await settle();
+    assert.equal(Core.getCombatState(combat).spent.hrolf, undefined);
+    assert.equal(card("Hrolf").querySelectorAll(".rhw-pip.on").length, 3);
+    assert.ok(card("Hrolf").querySelector("[data-rhw=refresh]").hasAttribute("disabled"), "nothing to refresh when full");
+  });
+
+  test("players don't get the refresh button", async () => {
+    await startCombat();
+    world.as(world.ursula);
+    Widget.render();
+    assert.equal(panel().querySelectorAll("[data-rhw=refresh]").length, 0);
+  });
+});
+
+describe("heroic actions panel", () => {
+  const heroicPanel = () => document.getElementById("rotss-heroic-heroics-widget");
+  const heroic = name => [...(heroicPanel()?.querySelectorAll(".rhw-heroic") ?? [])].find(c => c.querySelector("strong").textContent === name);
+
+  beforeEach(async () => {
+    await set("heroicWidgetShow", true);
+    const library = Core.getLibrary();
+    library.heroics = [
+      { id: "fleet", name: "Hallharn Fleet", ally: "Hallharn", limit: { uses: 2, per: "total" }, description: "An enemy loses a legendary action." },
+      { id: "surge", name: "Vani's Surge", ally: "Vani" },
+      { id: "breath", name: "Dragon's Breath", available: false }
+    ];
+    await Core.saveLibrary(library);
+    await settle();
+  });
+
+  test("lists the available heroic actions with their ally and uses left", () => {
+    assert.deepEqual([...heroicPanel().querySelectorAll(".rhw-heroic strong")].map(s => s.textContent), ["Hallharn Fleet", "Vani's Surge"]);
+    assert.match(heroic("Hallharn Fleet").querySelector(".rhw-speed").textContent, /Hallharn · 2\/2 in total/);
+    assert.ok(heroic("Vani's Surge").querySelector("[data-rhw=heroic]").hasAttribute("disabled"), "no combat yet");
+  });
+
+  test("using one marks it for the round; the GM can reset the round", async () => {
+    await startCombat();
+    heroic("Hallharn Fleet").querySelector("[data-rhw=heroic]").click();
+    await settle();
+    assert.ok(heroic("Hallharn Fleet").classList.contains("used"));
+    assert.match(heroic("Hallharn Fleet").textContent, /this round/);
+    assert.match(heroic("Hallharn Fleet").querySelector(".rhw-speed").textContent, /1\/2 in total/);
+    assert.ok(heroic("Hallharn Fleet").querySelector("[data-rhw=heroic]").hasAttribute("disabled"));
+
+    heroicPanel().querySelector("[data-rhw=resetRound]").click();
+    await settle();
+    assert.ok(!heroic("Hallharn Fleet").classList.contains("used"));
+    assert.ok(!heroic("Hallharn Fleet").querySelector("[data-rhw=heroic]").hasAttribute("disabled"));
+    assert.match(heroic("Hallharn Fleet").querySelector(".rhw-speed").textContent, /1\/2 in total/, "the total use stays spent");
+  });
+
+  test("any player can use one; only the GM can reset the round", async () => {
+    await startCombat();
+    world.as(world.bjorn);
+    Widget.render();
+    assert.equal(heroicPanel().querySelectorAll("[data-rhw=resetRound]").length, 0);
+    heroic("Vani's Surge").querySelector("[data-rhw=heroic]").click();
+    world.as(world.gm);
+    await settle();
+    assert.deepEqual(Core.getCombatState(combat).usedThisRound, ["surge"]);
+  });
+
+  test("shows the round, and is shown and hidden on its own", async () => {
+    await startCombat();
+    assert.match(heroicPanel().querySelector(".rhw-title").textContent, /round 1/);
+    heroicPanel().querySelector("[data-rhw=hide]").click();
+    await settle();
+    assert.equal(heroicPanel(), null);
+    assert.ok(panel(), "the companions panel stays");
+    assert.equal(Widget.isShown("heroics"), false);
+    assert.equal(Widget.isShown("companions"), true);
+  });
+
+  test("goes away when no heroic action is available", async () => {
+    const library = Core.getLibrary();
+    library.heroics.forEach(h => { h.available = false; });
+    await Core.saveLibrary(library);
+    await settle();
+    assert.equal(heroicPanel(), null);
+  });
+});

@@ -2,7 +2,7 @@
   "id": "rotss-heroic-tracker",
   "title": "Raiders of the Serpent Sea: Heroic & Companion Actions",
   "description": "Tracks companion actions (Companion Rules and Appendix D) and Ragnarök's Heroic Actions during combat, and puts effect reminders into the initiative order.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "authors": [
     {
       "name": "Harry"
@@ -10,7 +10,7 @@
   ],
   "url": "https://github.com/hsergelstringer/rotss-heroic-tracker",
   "manifest": "https://github.com/hsergelstringer/rotss-heroic-tracker/releases/latest/download/module.json",
-  "download": "https://github.com/hsergelstringer/rotss-heroic-tracker/releases/download/v0.0.2/module.zip",
+  "download": "https://github.com/hsergelstringer/rotss-heroic-tracker/releases/download/v0.0.3/module.zip",
   "bugs": "https://github.com/hsergelstringer/rotss-heroic-tracker/issues",
   "compatibility": {
     "minimum": "13",

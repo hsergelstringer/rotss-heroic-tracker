@@ -61,17 +61,10 @@ export class HeroicTracker extends HandlebarsApplicationMixin(ApplicationV2) {
     const state = Core.getCombatState(combat);
     const usage = Core.getUsage();
     const mayCompanion = Core.mayUse(combat, user, "companion");
-    const mayHeroic = Core.mayUse(combat, user, "heroic");
 
-    const verdictFor = (may, req) => View.verdict(combat, library, state, usage, may, req);
     const companions = View.companionCards(combat, user, { includeInactive: isGM });
 
-    const heroics = library.heroics.filter(h => isGM || h.available).map(h => ({
-      ...h,
-      used: state.usedThisRound.includes(h.id),
-      usesLabel: View.usesLabel(h.limit, Rules.heroicKey(h.id), state, usage),
-      ...verdictFor(mayHeroic, { kind: "heroic", heroicId: h.id })
-    }));
+    const heroics = View.heroicCards(combat, user, { includeUnavailable: isGM });
 
     const markers = Markers.markersIn(combat)
       .filter(c => isGM || !c.hidden)
